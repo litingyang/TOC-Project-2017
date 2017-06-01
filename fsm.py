@@ -65,7 +65,6 @@ class TocMachine(GraphMachine):
         pattern = "\D*(\d\d\d\d/\d\d/\d\d)\D*(\d+)"
         match = re.search(pattern,text)
         self.message = text
-        print("go to state5"+text)
         if match:
             return True
         else:
@@ -74,6 +73,7 @@ class TocMachine(GraphMachine):
 
     def on_enter_state1(self, update):
         string = "please enter: \n1.列車時刻查詢 \n2.查詢車次"
+        update.message.reply_photo("https://lh3.googleusercontent.com/_7_eAoMCky7lkHvZYr9fxXhdQP-jb6qjdmCiALuwvVhoeNM88TYGeGYcxmFZkMpi2zs=w170")
         update.message.reply_text(string)
         self.go_back(update)
 

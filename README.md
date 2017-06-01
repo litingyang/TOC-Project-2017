@@ -62,11 +62,11 @@ Every time `user` state is triggered to `advance` to another state, it will `go_
                 請輸入
                 起程站(ex:臺北):
                 到達站(ex:高雄):
-                日期:(ex:2017/06/08)
+                日期(ex:2017/06/08):
                 時間從(ex:12:00)至(ex:23:59)
 			```
 		
-		* Input: "起程站:臺北 到達站:高雄 日期:2017/06/08 時間從12:00至23:59"
+		* Input: "起程站:臺北 到達站:高雄 日期:2017/06/08 時間從12:00至23:59" or "臺北高雄 2017/06/08 12:00 23:59"
 			* Reply:
  	            ```sh
                     請輸入
@@ -93,7 +93,7 @@ Every time `user` state is triggered to `advance` to another state, it will `go_
                 ...
 			```
 		
-		* Input: "日期:2017/06/08 車次:129"
+		* Input: "日期:2017/06/08 車次:129" or "2017/06/08 129"
 			* Reply: 
 			 ```sh
                 站名:潮州 

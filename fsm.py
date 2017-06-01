@@ -25,26 +25,55 @@ class TocMachine(GraphMachine):
 
     def is_going_to_state4(self, update):
         text = update.message.text
-        pattern = "起程站[:|：]\s*([\u4E00-\u9FFF]+)\s*到達站[:|：]\s*([\u4E00-\u9FFF]+)\s*日期[:|：]\s*(\d\d\d\d/\d\d/\d\d)\s*時間從(\d\d)[:|：](\d\d)至(\d\d)[:|：](\d\d)"
+        pattern = "\s*\D*\s*(\d\d\d\d/\d\d/\d\d)\s*\D*(\d\d)[:|：]?(\d\d)\D*(\d\d)[:|：]?(\d\d)"
         match = re.search(pattern,text)
-        self.message = text
-        if match:
+        if not match:
+            update.message.reply_text("Bad request. Please enter again.")
+            return 0
+        day = match.group(1)
+        ft = match.group(2) + match.group(3)
+        tt = match.group(4) + match.group(5)
+
+        twrail = 'http://twtraffic.tra.gov.tw/twrail'
+        req = requests.get(twrail)
+        regular =  "TRStation.push\('\d+'\);TRStation.push\('\d+'\);"+"TRStation.push\('([\u4E00-\u9FFF]+)'\)"
+        stationlist = re.findall(regular,req.text)
+        text = text.replace('台','臺')
+        fs = ""
+        ts = ""
+        tmp = -1
+        for i in range(0,len(stationlist),1):
+            index = text.find(stationlist[i])
+            if index > -1:
+                if index > tmp:
+                    tmp = index
+                    fs = ts
+                    ts = stationlist[i]
+                else:
+                    fs = stationlist[i]
+        string = "起程站:"+ fs +"到達站:"+ ts +"日期:"+ day + "時間從" + ft + "至" + tt
+        match = re.search(regular,req.text)
+        self.message = string
+        if fs!="" and ts!="":
             return 1
         else:
+            update.message.reply_text("Bad request. Please enter again.")
             return 0
 
     def is_going_to_state5(self, update):
         text = update.message.text
-        pattern = "\s*日期[:|：]\s*(\d\d\d\d/\d\d/\d\d)\s*車次[:|：](\d+)"
+        pattern = "\D*(\d\d\d\d/\d\d/\d\d)\D*(\d+)"
         match = re.search(pattern,text)
         self.message = text
+        print("go to state5"+text)
         if match:
-            return 1
+            return True
         else:
-            return 0
+            update.message.reply_text("Bad request. Please enter again.")
+            return False
 
     def on_enter_state1(self, update):
-        string = "please enter: 1.列車時刻查詢 2.查詢車次"
+        string = "please enter: \n1.列車時刻查詢 \n2.查詢車次"
         update.message.reply_text(string)
         self.go_back(update)
 
@@ -53,14 +82,13 @@ class TocMachine(GraphMachine):
 
     def on_enter_state2(self, update):
         update.message.reply_text("請輸入\n日期(ex:2017/06/08):\n車次(ex:129):")
-        self.advance(update)
 
     def on_exit_state2(self, update):
         print('Leaving state2')
 
     def on_enter_state3(self, update):
-        update.message.reply_text("請輸入\n起程站(ex:臺北):\n到達站(ex:高雄):\n日期:(ex:2017/06/08)\n時間從(ex:12:00)至(ex:23:59)")
-        self.advance(update)
+        update.message.reply_text("請輸入\n起程站(ex:臺北):\n到達站(ex:高雄):\n日期(ex:2017/06/08):\n時間從(ex:12:00)至(ex:23:59)")
+
 
     def on_exit_state3(self, update):
         print('Leaving state3')
@@ -68,14 +96,14 @@ class TocMachine(GraphMachine):
     def on_enter_state4(self, update):
         input_text = self.message 
         print(input_text)
-        pattern = "\s*起程站[:|：]\s*([\u4E00-\u9FFF]+)\s*到達站[:|：]\s*([\u4E00-\u9FFF]+)\s*日期[:|：]\s*(\d\d\d\d/\d\d/\d\d)\s*時間從(\d\d)[:|：](\d\d)至(\d\d)[:|：](\d\d)"
+        pattern = "\s*起程站[:|：]\s*([\u4E00-\u9FFF]+)\s*到達站[:|：]\s*([\u4E00-\u9FFF]+)\s*日期[:|：]\s*(\d\d\d\d/\d\d/\d\d)\s*時間從(\d\d\d\d)至(\d\d\d\d)"
         twrail = 'http://twtraffic.tra.gov.tw/twrail'
         match = re.search(pattern,input_text)
         fs = match.group(1)
         ts = match.group(2)
         day = match.group(3)
-        ft = match.group(4) + match.group(5)
-        tt = match.group(6) + match.group(7)
+        ft = match.group(4)
+        tt = match.group(5)
         regular =  "TRStation.push\('(\d+)'\);TRStation.push\('(\d+)'\);"+"TRStation.push\('"+fs+"'\)"
         req = requests.get(twrail)
         match = re.search(regular,req.text)
@@ -118,7 +146,7 @@ class TocMachine(GraphMachine):
     def on_enter_state5(self, update):
         input_text = self.message
         print(input_text)
-        pattern = "\s*日期[:|：]\s*(\d\d\d\d/\d\d/\d\d)\s*車次[:|：](\d+)"
+        pattern = "\D*(\d\d\d\d/\d\d/\d\d)\D*(\d+)"
         match = re.search(pattern,input_text)
         string = "查無此資料" 
         if match:

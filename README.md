@@ -1,5 +1,5 @@
-# TOC Project 2017
-
+# Train timetable information bot
+ 
 2017 theory of computation final project
 
 A telegram bot based on a finite state machine
